@@ -18,34 +18,48 @@ public class DictionaryService {
     private final FileRepository fileRepository;
 
     public String search(int id, String key) {
-        return dictionaryRepository.getByID(id-1).search(key);
+        final Dictionary dictionary = dictionaryRepository.getByID(id);
+        synchronized (dictionary) {
+            return dictionary.search(key);
+        }
     }
 
     public Map<String, String> getValues(int id) {
-        return dictionaryRepository.getByID(id-1).getValues();
+        final Dictionary dictionary = dictionaryRepository.getByID(id);
+        synchronized (dictionary) {
+            return dictionary.getValues();
+        }
     }
 
     public void add(int id, String key, String value) {
-        dictionaryRepository.getByID(id-1).add(key, value);
+        final Dictionary dictionary = dictionaryRepository.getByID(id);
+        synchronized (dictionary) {
+            dictionary.add(key, value);
+        }
     }
 
-    public synchronized Map<String, String> read(int dictionaryId, int fileId) {
-        Dictionary dictionary = dictionaryRepository.getByID(dictionaryId-1);
-        File file = fileRepository.getFileByID(fileId-1);
-        try {
-            dictionary.read(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("read dictionary error");
+    public Map<String, String> read(int dictionaryId, int fileId) {
+        Dictionary dictionary = dictionaryRepository.getByID(dictionaryId);
+        File file = fileRepository.getFileByID(fileId);
+        synchronized (dictionary) {
+            try {
+                dictionary.read(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("read dictionary error");
+            }
+            return dictionary.getValues();
         }
-        return dictionary.getValues();
     }
 
     public boolean remove(int id, String key) {
-        return dictionaryRepository.getByID(id-1).remove(key);
+        final Dictionary dictionary = dictionaryRepository.getByID(id);
+        synchronized (dictionary) {
+            return dictionary.remove(key);
+        }
     }
 
-    public synchronized String[] getFiles() {
+    public String[] getFiles() {
         return fileRepository.getFiles();
     }
 

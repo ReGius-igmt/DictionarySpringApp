@@ -17,14 +17,14 @@ public class DictionaryRepository {
         };
     }
 
-    public Dictionary getByID(int id) {
-        if(id < 0) throw new IllegalArgumentException("id cant been < 0");
-        if(id > dictionaries.length - 1)
+    public synchronized Dictionary getByID(int id) {
+        if(id < 1) throw new IllegalArgumentException("id cant been < 1");
+        if(id > dictionaries.length)
             throw new IllegalArgumentException(String.format("dictionary not found by id [%s]", id));
-        return dictionaries[id];
+        return dictionaries[id-1];
     }
 
-    public Dictionary[] getAll() {
+    public synchronized Dictionary[] getAll() {
         return dictionaries;
     }
 }
